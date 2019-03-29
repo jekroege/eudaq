@@ -116,13 +116,13 @@ namespace eudaq {
       SetSection(section);
     }
     else{
-      m_config[""] = config[""];//the un-named section is always copied.
-      for(auto &e: config){
-	if(e.first == section){
-	  m_config[section] = e.second;
-	  SetSection(section);
-	}
-      }
+        m_config[""] = config[""];//the un-named section is always copied.
+        for(auto &e: config){
+            if(e.first == section){
+                m_config[section] = e.second;
+                SetSection(section);
+            }
+        }
     }
   }
 
@@ -213,6 +213,11 @@ namespace eudaq {
 
   bool Configuration::Has(const std::string& key) const {
       return m_cur->find(key) != m_cur->cend();
+  }
+
+  bool Configuration::HasSection(const std::string &section) const
+  {
+    return m_config.find(section) != m_config.end();
   }
 
   void Configuration::SetString(const std::string &key,
