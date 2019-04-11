@@ -88,7 +88,7 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
     << "\tTOT: " << tot;
 
     // Create a StandardPlane representing one sensor plane
-    eudaq::StandardPlane plane(0, "Caribou", "ATLASPix");
+    eudaq::StandardPlane plane(0, "Caribou", "ATLASpix");
     plane.SetSizeZS(25, 400, 1);
     plane.SetPixel(0, col, row, tot, timestamp);
 
@@ -99,14 +99,17 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
     d2->SetTimeBegin(timestamp);
     d2->SetTimeEnd(timestamp);
 
+    std::cout << "--> fpga_ts_ = " << fpga_ts_ << std::endl;
     return true;
   } else {
     // data is not hit information
-
     // Decode the message content according to 8 MSBits
     unsigned int message_type = (datain >> 24);
     LOG(DEBUG) << "Message type " << std::hex << message_type << std::dec;
+    //std::cout << "Message type " << std::hex << message_type << std::dec << std::endl;
+
     if(message_type == 0b01000000) {
+      // Timestamp from ATLASpix [23:0]
       uint64_t atp_ts = (datain >> 7) & 0x1FFFE;
       long long ts_diff = static_cast<long long>(atp_ts) - static_cast<long long>(fpga_ts_ & 0x1FFFF);
 
