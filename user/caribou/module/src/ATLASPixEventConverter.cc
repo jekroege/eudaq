@@ -156,6 +156,8 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       // BUSY was asserted due to FIFO_FULL + 24 LSBs of FPGA timestamp when it happened
     } else if(message_type == 0b01110000) {
       // T0 received
+      new_ts2_ = new_ts1_ = true;
+      fpga_ts1_ = fpga_ts2_ = fpga_ts3_ = 0;
       LOG(DEBUG) << "Another T0 event was found in the data";
       timestamps_cleared_ = true;
     } else if(message_type == 0b00000000) {
