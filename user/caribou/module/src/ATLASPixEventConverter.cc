@@ -31,6 +31,7 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
 
   // No event
   if(!ev || ev->NumBlocks() < 1) {
+    std::cout << "no event" << std::endl;
     return false;
   }
 
@@ -43,8 +44,10 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
   if(datain & 0x80000000) {
     // Do not return and decode pixel data before T0 arrived
     if(!timestamps_cleared_) {
+      std::cout << "!timestamps_cleared_" << std::endl;
       return false;
     }
+    std::cout << "Finally: pixel data AND timestamps_cleared_ = true" << std::endl;
     // Structure: {1'b1, column_addr[5:0], row_addr[8:0], rise_timestamp[9:0], fall_timestamp[5:0]}
     // Extract pixel data
     long ts2 = gray_decode((datain)&0x003F);
@@ -86,6 +89,9 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
     LOG(DEBUG) << "HIT: TS1: " << ts1 << "\t0x" << std::hex << ts1 << "\tTS2: " << ts2 << "\t0x" << std::hex << ts2
     << "\tTS_FULL: " << hit_ts << "\t" << timestamp << "ns"
     << "\tTOT: " << tot;
+    std::cout << "HIT: TS1: " << ts1 << "=0x" << std::hex << ts1 << "\tTS2: " << std::dec << ts2 << "=0x" << std::hex << ts2
+    << "\tTS_FULL: " << std::dec << hit_ts << "\t" << timestamp << "ns"
+    << "\tTOT: " << std::dec << tot << std::dec << "\trow: " << row << "\tcol: " << col << std::endl;
 
     // Create a StandardPlane representing one sensor plane
     eudaq::StandardPlane plane(0, "Caribou", "ATLASpix");
@@ -124,8 +130,11 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       }
       readout_ts_ = static_cast<unsigned long long>(static_cast<long long>(fpga_ts_) + ts_diff);
       LOG(DEBUG) << "RO_ts " << std::hex << readout_ts_ << " atp_ts " << atp_ts << std::dec;
+      std::cout << "RO_ts " << std::hex << readout_ts_ << " atp_ts " << atp_ts << std::dec << std::endl;
     } else if(message_type == 0b00010000) {
       // Trigger counter from FPGA [23:0] (1/4)
+      // do nothing here?
+      std::cout << "Do nothing!" << std::endl;
     } else if(message_type == 0b00110000) {
       // Trigger counter from FPGA [31:24] and timestamp from FPGA [63:48] (2/4)
       fpga_ts1_ = ((static_cast<unsigned long long>(datain) << 48) & 0xFFFF000000000000);
@@ -137,6 +146,7 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       if((!new_ts1_) && (fpga_tsx < fpga_ts2_)) {
         fpga_ts1_ += 0x0001000000000000;
         LOG(DEBUG) << "Missing TS_FPGA_1, adding one";
+        std::cout << "Missing TS_FPGA_1, adding one" << std::endl;
       }
       new_ts1_ = false;
       new_ts2_ = true;
@@ -148,10 +158,12 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       if((!new_ts2_) && (fpga_tsx < fpga_ts3_)) {
         fpga_ts2_ += 0x0000000001000000;
         LOG(DEBUG) <<"Missing TS_FPGA_2, adding one";
+        std::cout <<"Missing TS_FPGA_2, adding one" << std::endl;
       }
       new_ts2_ = false;
       fpga_ts3_ = fpga_tsx;
       fpga_ts_ = fpga_ts1_ | fpga_ts2_ | fpga_ts3_;
+      std::cout << "fpga_ts_ = " << fpga_ts_ << std::endl;
     } else if(message_type == 0b00000010) {
       // BUSY was asserted due to FIFO_FULL + 24 LSBs of FPGA timestamp when it happened
     } else if(message_type == 0b01110000) {
@@ -159,11 +171,13 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       new_ts2_ = new_ts1_ = true;
       fpga_ts1_ = fpga_ts2_ = fpga_ts3_ = 0;
       LOG(DEBUG) << "Another T0 event was found in the data";
+      std::cout << "########Another T0 event was found in the data" << std::endl;
       timestamps_cleared_ = true;
     } else if(message_type == 0b00000000) {
 
       // Empty data - should not happen
       LOG(DEBUG) << "EMPTY_DATA";
+      std::cout << "EMTPY DATA" << std::endl;
     } else {
 
       // Other options...
@@ -171,29 +185,40 @@ bool ATLASPixEvent2StdEventConverter::Converting(eudaq::EventSPC d1, eudaq::Stan
       // Unknown message identifier
       if(message_type & 0b11110010) {
         LOG(DEBUG) << "UNKNOWN_MESSAGE";
+        std::cout << "UNKNOWN_MESSAGE" << std::endl;
       } else {
         // Buffer for chip data overflow (data that came after this word were lost)
         if((message_type & 0b11110011) == 0b00000001) {
           LOG(DEBUG) << "BUFFER_OVERFLOW";
+          std::cout << "BUFFER_OVERFLOW" << std::endl;
         }
         // SERDES lock established (after reset or after lock lost)
         if((message_type & 0b11111110) == 0b00001000) {
           LOG(DEBUG) << "SERDES_LOCK_ESTABLISHED";
+          std::cout << "SERDES_LOCK_ESTABLISHED" << std::endl;
         }
         // SERDES lock lost (data might be nonsense, including up to 2 previous messages)
         else if((message_type & 0b11111110) == 0b00001100) {
           LOG(DEBUG) << "SERDES_LOCK_LOST";
+          std::cout << "SERDES_LOCK_LOST" << std::endl;
         }
         // Unexpected data came from the chip or there was a checksum error.
         else if((message_type & 0b11111110) == 0b00000100) {
           LOG(DEBUG) << "WEIRD_DATA";
+          std::cout << "WEIRD_DATA" << std::endl;
         }
         // Unknown message identifier
         else {
           LOG(DEBUG) << "UNKNOWN_MESSAGE";
+          std::cout << "UNKNOWN_MESSAGE" << std::endl;
         }
       }
-    }
+    } // else
   }
+  // This way we always return false -> decoding failed when data != hit information
+  // Tha's okay but "decoding failed" only means "no pixel data"
+
+  //std::cout << "--> fpga_ts_ = " << fpga_ts_ << std::endl;
+
   return false;
 }
