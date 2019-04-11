@@ -3,7 +3,7 @@
 #  TLUFIRMWARE_DEFINITIONS - Compiler switches required for using TLUFirmware
 
 file(GLOB_RECURSE EUDET_TLU_FIRMWARE_FOUND_LIST
-  ${CMAKE_CURRENT_LIST_DIR}/../extern/*/TLU_Toplevel.bit)
+  ${PROJECT_SOURCE_DIR}/extern/*/TLU_Toplevel.bit)
 
 # could not find the package at the usual locations -- try to copy from AFS if accessible
 if (NOT EUDET_TLU_FIRMWARE_FOUND_LIST)

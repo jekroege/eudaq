@@ -14,7 +14,7 @@ IF(COMMAND cmake_policy)
 ENDIF(COMMAND cmake_policy)
 
 # determine path to zestsc1 package in ./extern folder
-file(GLOB_RECURSE extern_file ${CMAKE_CURRENT_LIST_DIR}/../extern/*ZestSC1.h)
+file(GLOB_RECURSE extern_file ${PROJECT_SOURCE_DIR}/extern/*ZestSC1.h)
 if (extern_file)
   # should have found multiple files of that name, take root of folder (no 'windows*7/inc' string)
   FOREACH (this_file ${extern_file})
@@ -58,7 +58,7 @@ if (WIN32)
       ${arg})
   endif()
 elseif (UNIX)
-    #MESSAGE(STATUS "UNIX OS found. extern_lib_path = ${extern_lib_path}" )
+    MESSAGE(STATUS "UNIX OS found. extern_lib_path = ${extern_lib_path}" )
     
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       find_library(ZESTSC1_LIBRARY NAMES ZestSC1
