@@ -417,11 +417,11 @@ void Timepix3Producer::DoConfigure() {
     }
 
     // set output mask
-    if( !spidrctrl->setOutputMask(device_nr, 0xFF) ) {
+    if( !spidrctrl->setOutputMask(device_nr, 0x7F) ) {  // disable 8th link
       EUDAQ_ERROR("setOutputMask: " + spidrctrl->errorString());
       serious_error = true;
     } else {
-      EUDAQ_DEBUG("setOutputMask = 0xFF");
+      EUDAQ_DEBUG("setOutputMask = 0x7F");
     }
 
     // set destination (DAQ PC) IP address
