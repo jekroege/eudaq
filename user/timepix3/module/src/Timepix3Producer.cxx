@@ -653,7 +653,7 @@ void Timepix3Producer::DoConfigure() {
     if( !spidrctrl->setPixelConfig( device_nr ) ) {
       EUDAQ_ERROR("setPixelConfig: " + spidrctrl->errorString());
       serious_error = true;
-    } else {
+    } else if(false) { 
       // read pixel configuration from device
       if( !spidrctrl->getPixelConfig( device_nr ) ) {
         EUDAQ_ERROR("getPixelConfig: " + spidrctrl->errorString());
@@ -774,6 +774,7 @@ void Timepix3Producer::DoConfigure() {
     // select second local pixel configuration set for reading the data from chip
     spidrctrl->selectPixelConfig(1);
     // read pixel configuration from device
+    if(false) {
     if( !spidrctrl->getPixelConfig( device_nr ) ) {
       EUDAQ_ERROR("getPixelConfig: " + spidrctrl->errorString());
       serious_error = true;
@@ -793,6 +794,7 @@ void Timepix3Producer::DoConfigure() {
       + ", testbit set: " + std::to_string(cnt_test)
       + " threshold set: " + std::to_string(cnt_thrs) );
     }
+    } // if(false) for testing
     // return to default pixel configuration set
     spidrctrl->selectPixelConfig(0);
 
