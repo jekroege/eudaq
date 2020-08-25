@@ -188,6 +188,23 @@ void CaribouProducer::DoStopRun() {
   std::lock_guard<std::mutex> lock{device_mutex_};
   device_->daqStop();
   LOG(INFO) << "Stopped run.";
+
+  LOG(INFO) << "Copying data to runcontrol...";
+
+  char dirName[512];
+  std::sprintf(dirName,"run%06i",GetRunNumber());
+  std::string cmd = "mkdir "+ std::string(dirName);
+  LOG(INFO) << "Creating directory " << dirName << ", system() returns " << system(cmd.c_str());
+
+  cmd = "mv data.bin " + std::string(dirName);
+  LOG(INFO) << "Moving file into directory, system() returns " << system(cmd.c_str());
+
+  cmd = "scp -r " + std::string(dirName) + " teleuser@192.168.21.1:/data/clicdp_202008/";
+  LOG(INFO) << "Copying data over to runcontrol, system() returns " << system(cmd.c_str());
+
+  cmd = "rm -r " + std::string(dirName);
+  LOG(INFO) << "Removing old data, system() returns " << system(cmd.c_str());
+
 }
 
 void CaribouProducer::RunLoop() {
